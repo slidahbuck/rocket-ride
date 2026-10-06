@@ -2,6 +2,28 @@
 
 Import one page of open issues from a public GitHub repository into a local SQLite file, then read the saved issues without contacting GitHub. Pull requests are excluded, and repeated imports update existing records without duplicates.
 
+## Reviewer quick start
+
+Clone the submission branch, enter the folder, and run one command:
+
+```sh
+git clone --branch codex/issue-connector https://github.com/slidahbuck/rocket-ride.git
+cd rocket-ride
+python3 -m rocketride demo
+```
+
+Requires **Python 3.10 or newer with SQLite support**, Git, and internet access. No package installation or API token is needed. On Windows, substitute `py` for `python3` if needed. The repository is private, so reviewers must have GitHub access before cloning; arranging that access is still part of submission preparation.
+
+The demo runs the automated tests, imports a real page from `python/cpython`, reads the saved data in a separate Python process with GitHub requests blocked, imports again, checks for duplicate keys, and shows an intentional invalid-input error. It prints a compact sample and explains what each step establishes, followed by commands for using the connector yourself. A fresh temporary database is removed afterward, so existing database files are untouched. Issue titles and counts depend on live GitHub data and can change between runs.
+
+To use a different public repository:
+
+```sh
+python3 -m rocketride demo --repository owner/name
+```
+
+The demo exits successfully only if its checks pass. A network, repository-access, or rate-limit failure is explained and returns a nonzero exit status; the tests still run before live requests. To run only the offline tests, use `python3 -m unittest discover -v`.
+
 ## Prerequisites and local setup
 
 - Python 3.10 or newer with SQLite support. Development verification used Python 3.14.7.
@@ -9,14 +31,9 @@ Import one page of open issues from a public GitHub repository into a local SQLi
 - Internet access for imports. Local reads and automated tests work offline.
 - No third-party Python dependencies, API token, paid tools, or hosted services are required.
 
-```sh
-git clone https://github.com/slidahbuck/rocket-ride.git
-cd rocket-ride
-git checkout codex/issue-connector
-python3 --version
-```
+Run commands from the repository root. Check your Python version with `python3 --version`.
 
-Run commands from the repository root. On Windows, substitute `py` for `python3` if needed. The repository is initially private, so cloning requires authorized GitHub access; arrange reviewer access before submission.
+Run `python3 -m rocketride` to see command help and quick-start guidance.
 
 ## Run
 
@@ -89,13 +106,17 @@ python3 -m unittest discover -v
 
 Tests mock the HTTP boundary and use real temporary SQLite files. They cover import and read, pull request filtering, updated titles and URLs, duplicate prevention, repository isolation and case normalization, persistence in a separate process, empty results, invalid inputs, HTTP and network failures, malformed responses, storage errors, transaction rollback, and CLI errors. The local read test makes network access fail if attempted.
 
-A real API request is a separate manual check, not part of the deterministic automated suite. Public requests are rate limited, and the contents of live repositories change.
+Reviewer-demo tests also cover temporary database cleanup, failed checks and API calls, CLI guidance and repository selection, and detecting an accidental GitHub request in the separate read process.
+
+A real API request is separate from the deterministic automated suite. The `demo` command combines that suite with live checks for reviewer convenience. Public requests are rate limited, and the contents of live repositories change.
 
 ### Development verification
 
 On October 5, 2026, all 16 automated tests passed on Python 3.14.7. A separate live CLI check imported 11 issues from the first page of `python/cpython`, read them in another process, repeated the import with 11 saved issues and zero duplicate groups, and verified the invalid-input error and exit status. Database files used for verification were temporary and are not included in the repository. The live count is a record of that check, not an expected count for future runs.
 
 On October 6, 2026, a fresh clone from GitHub passed all 16 tests without installing dependencies. The live CLI check imported and read 14 issues, repeated the import with zero duplicate groups, and confirmed the invalid-input error. This also verified that the pushed repository contains everything needed for local use.
+
+After adding the reviewer command on October 6, all 25 automated tests passed. The guided live demo imported 14 issues, matched the saved records in a new process with GitHub requests blocked, repeated the import with zero duplicate groups, showed the expected invalid-input error, and removed its temporary database.
 
 ## Snapshot behavior and scope
 

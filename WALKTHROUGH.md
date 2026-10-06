@@ -1,5 +1,19 @@
 # Review and demo walkthrough
 
+## One-command reviewer flow
+
+After cloning the submission branch, run from the repository root:
+
+```sh
+python3 -m rocketride demo
+```
+
+Python 3.10 or newer with SQLite support and internet access are required. No packages need installing. The command runs the automated tests first, imports a live page from `python/cpython`, shows a sample, reads the saved records in a separate Python process with GitHub requests blocked, repeats the import, checks for duplicate keys, and displays an expected invalid-input error. Its explanations and final commands let reviewers continue exploring without preparing their own verification script.
+
+The demo uses a fresh temporary database and deletes it afterward. Your existing `review.sqlite3` or other database files are untouched. Live issue counts and titles may change; zero duplicate keys is the stable requirement. A failed live request produces useful guidance and a nonzero exit status after the tests have run. Run `python3 -m unittest discover -v` to verify only the offline suite, or `python3 -m rocketride demo --repository owner/name` to choose a different public repository.
+
+Reviewers need GitHub access to clone the private repository. That access and an accurate personal learning reflection still need completing before submission.
+
 ## Learn the implementation
 
 Read these files in order and use the questions to check your understanding:
@@ -9,6 +23,7 @@ Read these files in order and use the questions to check your understanding:
 3. `rocketride/github.py`: What URL is requested? Why do we filter `pull_request` and save `html_url`? What happens before a malformed response reaches the database?
 4. `rocketride/storage.py`: Why are repository and issue number both in the primary key? What does `excluded.title` mean? What does the transaction protect?
 5. `tests/test_connector.py`: How can network requests be mocked while the database stays real? Which tests establish persistence and offline reading?
+6. `rocketride/demo.py`: How does the one-command flow check the core interface while keeping live requests separate from deterministic tests?
 
 Run `python3 -m unittest discover -v`, then open the repeated-import and rollback tests and predict their assertions before reading them. Ask Codex to explain a specific line or propose a failing example if you get stuck. Update the README's personal reflection with what you actually learned before submitting.
 
@@ -44,6 +59,8 @@ PY
 Expected duplicates: `[]`. Live GitHub data can change between imports, so unchanged total count is helpful evidence but not a guaranteed outcome. The unique-key query and automated repeated-input test establish duplicate prevention independently of live changes.
 
 ## Demo plan under two minutes
+
+The reviewer command is a convenient complete check. For your recorded submission, use the individual commands in Manual verification so your narration clearly explains each operation and your design decision.
 
 Prepare the terminal, commands, and a fresh database filename before recording. Rehearse once to avoid lengthy output scrolling. If the issue list is long, show the operation, count, and a representative issue in the terminal output rather than scrolling through every record.
 

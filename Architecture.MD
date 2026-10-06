@@ -8,13 +8,16 @@
 - `storage.py`: Creates the table, performs parameterized UPSERTs in a transaction, and returns rows sorted by issue number. Connections are closed after each operation.
 - `connector.py`: Exposes the two functions, validates the database path, coordinates import/read, and translates expected errors into dictionaries.
 - `errors.py`: Carries stable error codes for expected failures.
-- `__main__.py`: Parses CLI arguments, calls the reusable functions, serializes JSON, and sets the exit status.
+- `__main__.py`: Parses CLI arguments, dispatches the guided demo or reusable functions, serializes import/read results as JSON, and sets the exit status.
+- `demo.py`: Runs the automated suite and a guided live review using a temporary database. It shows a sample issue and explains each check without requiring reviewers to prepare commands or manage database files.
 
 ## Data flow
 
 Import: validate input and database path, request `GET /repos/{owner}/{repo}/issues?state=open&per_page=30&page=1`, parse JSON, filter pull requests, validate and map required fields, save the batch, return the processed issues. Fetch and validation finish before opening storage, so API and malformed-response failures leave existing data untouched.
 
 Read: validate input and database path, open SQLite, initialize an empty table if needed, select rows for the normalized repository, return dictionaries. The read path never invokes the GitHub client. Restart persistence is verified with a separate CLI process.
+
+Reviewer demo: run tests, import a live page, read it in a separate Python process with the GitHub HTTP entry point blocked, repeat the import, query SQLite for duplicate keys, and check an intentional invalid-input failure. The fresh database is held in a temporary directory and deleted afterward. This verifies the submitted flow without modifying existing user data. Live titles and counts can change between requests, so duplicate-key checks do not depend on identical counts. The demo returns a nonzero status if a check or live request fails.
 
 ## Database schema
 
@@ -33,6 +36,8 @@ The composite primary key separates identical issue numbers in different reposit
 ## Configuration and failures
 
 Database path is a function argument or CLI `--db` option. The default is `issues.sqlite3` relative to the working directory; parent directories must exist. File paths support persistence, while `:memory:` is rejected. The database file is runtime data and is ignored by Git.
+
+`python3 -m rocketride demo` defaults to the public repository `python/cpython`; `--repository owner/name` chooses another public repository. The reviewer path requires internet access for its two imports, while the test suite and local reads work offline. It uses the standard library and needs no dependency installation. Running the CLI with no arguments prints help and quick-start guidance.
 
 The GitHub client uses a 15-second socket timeout, a fixed first page of 30 entries, the JSON accept header, a user agent, and API version `2026-03-10`. Public requests use no token. GitHub's unauthenticated rate limit applies.
 
