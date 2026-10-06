@@ -95,6 +95,8 @@ A real API request is a separate manual check, not part of the deterministic aut
 
 On October 5, 2026, all 16 automated tests passed on Python 3.14.7. A separate live CLI check imported 11 issues from the first page of `python/cpython`, read them in another process, repeated the import with 11 saved issues and zero duplicate groups, and verified the invalid-input error and exit status. Database files used for verification were temporary and are not included in the repository. The live count is a record of that check, not an expected count for future runs.
 
+On October 6, 2026, a fresh clone from GitHub passed all 16 tests without installing dependencies. The live CLI check imported and read 14 issues, repeated the import with zero duplicate groups, and confirmed the invalid-input error. This also verified that the pushed repository contains everything needed for local use.
+
 ## Snapshot behavior and scope
 
 - Each import requests exactly page 1 with 30 entries and `state=open`. The page can include pull requests, so fewer than 30 issues may be saved.

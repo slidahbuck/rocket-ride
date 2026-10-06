@@ -12,7 +12,7 @@ Read these files in order and use the questions to check your understanding:
 
 Run `python3 -m unittest discover -v`, then open the repeated-import and rollback tests and predict their assertions before reading them. Ask Codex to explain a specific line or propose a failing example if you get stuck. Update the README's personal reflection with what you actually learned before submitting.
 
-## Manual verification tomorrow
+## Manual verification
 
 Use a new filename for a fresh run, and use that same file throughout:
 
@@ -45,7 +45,7 @@ Expected duplicates: `[]`. Live GitHub data can change between imports, so uncha
 
 ## Demo plan under two minutes
 
-Prepare the terminal, commands, and a fresh database filename before recording. Rehearse once to avoid lengthy output scrolling. You can pipe a successful command to `python3 -m json.tool` or show selected JSON fields with a small Python snippet if the issue list is too long, but keep the underlying operation visible.
+Prepare the terminal, commands, and a fresh database filename before recording. Rehearse once to avoid lengthy output scrolling. If the issue list is long, show the operation, count, and a representative issue in the terminal output rather than scrolling through every record.
 
 | Time | Show and explain |
 | --- | --- |
