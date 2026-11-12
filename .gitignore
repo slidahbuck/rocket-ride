@@ -15,3 +15,7 @@ dist/
 *.egg-info/
 .coverage
 htmlcov/
+.rocketride/
+
+# RocketRide workspace: credentials, vendored packages, dependencies and build output
+**/node_modules/

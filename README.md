@@ -2,6 +2,10 @@
 
 Import one page of open issues from a public GitHub repository into a local SQLite file, then read the saved issues without contacting GitHub. Pull requests are excluded, and repeated imports update existing records without duplicates.
 
+## RocketRide App Builder demo
+
+[Answer Cache](apps/answer-cache-ui/README.md) is the Redis integration demo. It runs in VS Code App Builder and shows a live cache miss, hit, and expiry using Alex’s Redis/Valkey node. The GitHub issue connector described below is a separate project.
+
 ## Reviewer quick start
 
 Clone the submission branch, enter the folder, and run one command:
