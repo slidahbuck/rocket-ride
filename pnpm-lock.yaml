@@ -46,6 +46,46 @@ importers:
         specifier: ^5.3.0
         version: 5.9.3
 
+  apps/billing_regression_checker-ui:
+    dependencies:
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
+      rocketride:
+        specifier: file:../../.rocketride/client/rocketride.tgz
+        version: file:.rocketride/client/rocketride.tgz
+      shell:
+        specifier: file:../../.rocketride/shell/shell.tgz
+        version: file:.rocketride/shell/shell.tgz
+    devDependencies:
+      '@module-federation/rsbuild-plugin':
+        specifier: 2.5.1
+        version: 2.5.1(@rsbuild/core@2.0.15(@module-federation/runtime-tools@2.5.1(node-fetch@2.7.0(encoding@0.1.13))))(@rspack/core@2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.24))(node-fetch@2.7.0(encoding@0.1.13))(typescript@5.9.3)
+      '@rsbuild/core':
+        specifier: ~2.0.11
+        version: 2.0.15(@module-federation/runtime-tools@2.5.1(node-fetch@2.7.0(encoding@0.1.13)))
+      '@rsbuild/plugin-react':
+        specifier: ~2.0.1
+        version: 2.0.1(@rsbuild/core@2.0.15(@module-federation/runtime-tools@2.5.1(node-fetch@2.7.0(encoding@0.1.13))))(@rspack/core@2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.24))
+      '@types/node':
+        specifier: ^20.19.41
+        version: 20.19.43
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.3.31
+      '@types/react-dom':
+        specifier: ^18.2.0
+        version: 18.3.7(@types/react@18.3.31)
+      react-refresh:
+        specifier: ^0.14.2
+        version: 0.14.2
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
 packages:
 
   '@babel/runtime@7.29.14':
