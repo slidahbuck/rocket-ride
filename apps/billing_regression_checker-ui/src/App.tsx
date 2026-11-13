@@ -8,6 +8,8 @@ import { AppLayout, Button, Card, StatusBadge } from 'shell';
 import type { ShellAppProps } from 'shell';
 import { runDryRun, SYNTHETIC_EVENTS } from './billingRegression';
 import type { DryRunResult, HandlerResult } from './billingRegression';
+import ResultStorage from './ResultStorage';
+import type { LoadedResult } from './savedResults';
 
 const styles: Record<string, React.CSSProperties> = {
 	page: {
@@ -98,10 +100,19 @@ const VERDICT_COPY: Record<DryRunResult['verdict'], { title: string; detail: str
 const App: React.FC<ShellAppProps> = () => {
 	const [result, setResult] = useState<DryRunResult | null>(null);
 	const [runCount, setRunCount] = useState(0);
+	const [loadedFrom, setLoadedFrom] = useState<string | null>(null);
+	const [storageBusy, setStorageBusy] = useState(false);
+	const events = result?.baseline.steps.map((step) => step.event) ?? SYNTHETIC_EVENTS;
 
 	function handleRun() {
 		setResult(runDryRun());
 		setRunCount((count) => count + 1);
+		setLoadedFrom(null);
+	}
+
+	function handleLoad(loaded: LoadedResult) {
+		setResult(loaded.result);
+		setLoadedFrom(`Loaded from Redis: ${loaded.key}. Saved at ${loaded.savedAt}. Verdict recomputed in code.`);
 	}
 
 	return (
@@ -126,7 +137,7 @@ const App: React.FC<ShellAppProps> = () => {
 							<h2 id='scenario-title' style={styles.sectionTitle}>Successful renewal, then an older failure</h2>
 							<p style={styles.paragraph}>Access starts active. A renewal succeeds at 10:05 UTC. A failure from 10:00 UTC arrives afterward. Expected final state: access active.</p>
 							<div style={styles.row}>
-								<Button onClick={handleRun}>Run dry run</Button>
+								<Button onClick={handleRun} disabled={storageBusy}>Run dry run</Button>
 								<span style={styles.meta}>2 events · 2 handlers · In memory only</span>
 							</div>
 						</section>
@@ -135,7 +146,8 @@ const App: React.FC<ShellAppProps> = () => {
 					<div role='status' aria-live='polite' aria-atomic='true'>
 						{result ? (
 							<div style={styles.verdict}>
-								<span style={styles.eyebrow}>Computed verdict / Run {runCount} complete</span>
+								<span style={styles.eyebrow}>{loadedFrom ? 'Verified saved result' : `Computed verdict / Run ${runCount} complete`}</span>
+								{loadedFrom && <p style={styles.meta}>{loadedFrom}</p>}
 								<h2 style={styles.verdictTitle}>{VERDICT_COPY[result.verdict].title}</h2>
 								<p style={styles.paragraph}>{VERDICT_COPY[result.verdict].detail}</p>
 							</div>
@@ -150,25 +162,25 @@ const App: React.FC<ShellAppProps> = () => {
 					<Card header={<h2 style={styles.sectionTitle}>Event order & access trace</h2>} noBodyPadding>
 						<div style={styles.tableScroll} tabIndex={0} role='region' aria-label='Event replay table, scroll horizontally on small screens'>
 							<table style={styles.table}>
-								<caption style={styles.caption}>Delivery order is preserved. All timestamps are on November 13, 2026, in UTC.</caption>
+								<caption style={styles.caption}>Delivery order is preserved. All timestamps are in UTC.</caption>
 								<thead><tr>
 									{['Delivery', 'Synthetic event', 'Occurred / Delivered', 'Baseline after event', 'Candidate after event'].map((label) => (
 										<th key={label} scope='col' style={styles.th}>{label}</th>
 									))}
 								</tr></thead>
-								<tbody>{SYNTHETIC_EVENTS.map((event, index) => (
+								<tbody>{events.map((event, index) => (
 									<tr key={event.id}>
 										<td style={styles.td}><span style={styles.order}>{String(index + 1).padStart(2, '0')}</span></td>
 										<th scope='row' style={styles.td}>
 											<div style={styles.cell}>
 												<span>{event.type === 'renewal.succeeded' ? 'Renewal succeeded' : 'Renewal failed'}</span>
 												<code style={styles.mono}>{event.id}</code>
-												{index === 1 && <span style={styles.stale}>Occurred 5 minutes earlier</span>}
+												{events.slice(0, index).some((prior) => Date.parse(prior.occurredAt) > Date.parse(event.occurredAt)) && <span style={styles.stale}>Older than a prior event</span>}
 											</div>
 										</th>
 										<td style={styles.td}><div style={styles.cell}>
-											<time style={styles.time} dateTime={event.occurredAt}>{event.occurredAt.slice(11, 19)} occurred</time>
-											<time style={styles.time} dateTime={event.deliveredAt}>{event.deliveredAt.slice(11, 19)} delivered</time>
+											<time style={styles.time} dateTime={event.occurredAt}>{event.occurredAt.replace('T', ' ').replace('Z', '')} occurred</time>
+											<time style={styles.time} dateTime={event.deliveredAt}>{event.deliveredAt.replace('T', ' ').replace('Z', '')} delivered</time>
 										</div></td>
 										<td style={styles.td}><TraceCell result={result?.baseline} index={index} /></td>
 										<td style={styles.td}><TraceCell result={result?.candidate} index={index} /></td>
@@ -179,9 +191,11 @@ const App: React.FC<ShellAppProps> = () => {
 						<p style={styles.note}>Rule checked in code: the latest event by occurrence time determines access. Passing means the handler matches that state.</p>
 					</Card>
 
+					<ResultStorage result={result} onLoad={handleLoad} onBusyChange={setStorageBusy} />
+
 					<footer style={styles.foot}>
 						<p style={styles.meta}>This dry run uses synthetic events, makes no Redis calls, and does not call an LLM. Each run starts from the same active state.</p>
-						<p style={styles.paragraph}><strong>Next step:</strong> Read Redis through <code style={styles.mono}>client.tool()</code>, show proposed changes for a person to approve before any write, and let the LLM explain the computed results.</p>
+						<p style={styles.paragraph}>Saves and loads call Redis directly through <code style={styles.mono}>client.tool()</code>. Code decides the verdict. Any future LLM integration may explain the result only.</p>
 					</footer>
 				</div>
 			</main>
