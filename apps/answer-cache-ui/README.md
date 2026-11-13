@@ -12,7 +12,7 @@ A RocketRide App Builder demo for the Redis tool node in [PR #3049](https://gith
    ```
 
    The script keeps the preview engine in the foreground at `http://127.0.0.1:5565`. It copies the installed engine, adds the pinned Redis PR node to the copy, and starts a loopback Valkey or Redis process if one is not already available. Leave the terminal open. You can pass a checkout of the Redis PR as the first argument to use its local Git objects.
-3. Open the repository root in VS Code, then open [answer-cache.rrapp](answer-cache.rrapp). Select **Design → Preview**. This workspace points App Builder at the local service. If the builder was already open when the engine started, reload the VS Code window and reopen the preview.
+3. Open the repository root in VS Code. In RocketRide’s extension settings, select **Service** for the development connection and choose **Save & Reconnect** to use the Redis-enabled engine from step 2. Open [answer-cache.rrapp](answer-cache.rrapp) and select **Design → Preview**. To use RocketRide’s managed engine again, select **Local** in the same settings.
 
 The App Builder downloads the matching platform packages and installs workspace dependencies. To build from a terminal after it does so, run `pnpm --filter local-answer-cache build` from the repository root.
 
