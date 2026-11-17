@@ -9,6 +9,8 @@ Replay a successful renewal followed by a delayed, older failure through a basel
 3. Confirm that the 10:05 UTC success arrives first (10:06), followed by the 10:00 failure (10:07). The baseline ends with access inactive and fails. The candidate ignores the older failure, keeps access active, and passes.
 4. Run again to confirm that every replay starts from the same active state. Check the preview's light and dark themes and narrow viewport options.
 
+If Preview shows a cloud sign-in or expired-session message while the VS Code status bar says **Connected (Local)**, close the `.rrapp` editor and reopen it after the local engine connects. The preview should open from a loopback address. To inspect the **Tools → Redis** connection, open `src/redis.pipe` with the RocketRide pipeline editor.
+
 ## Save and verify from a fresh session
 
 The connected local engine must load your locally built `tool_redis` node and its Redis Python dependency. Redis or Valkey must be reachable **from the engine**. The bundled `src/redis.pipe` defaults to `127.0.0.1:6381`, database 0, with the prefix `rr:billing-regression:v1:`. Edit the endpoint in that file for your local setup. The app does not install nodes or change the engine connection.
@@ -59,4 +61,6 @@ The tests use Node's built-in runner with TypeScript stripping (Node 22.6+). The
 
 Platform guide: `.rocketride/docs/ROCKETRIDE_APPS.md`.
 
-Verified in connected Local Preview on November 13, 2026: dry-run behavior, writes off by default, write opt-in, the exact save approval dialog, cancellation, and the live missing-node error. The currently connected stock engine does not advertise `tool_redis`, so a live Redis save/load round trip requires connecting the engine with your locally built node. No Redis writes were performed during UI verification. All 18 automated tests and the production build passed.
+Verified on November 16, 2026 in VS Code **Local** mode with RocketRide engine 3.6.0, Redis node PR commit `6d312da6`, and Valkey on `127.0.0.1:6381`. The canvas showed both Tools and Redis. The dry run showed baseline Fail and candidate Pass. One approved save created a real Redis record, and a fresh preview loaded it with writes off and recomputed the same verdict. All 18 automated tests and the production build passed.
+
+The Redis node was added to the managed engine on the demo machine. A stock installation on another machine or a replaced engine needs the node loaded before storage works. The [existing macOS preview helper](../answer-cache-ui/README.md#open-in-vs-code) documents an alternative that uses RocketRide's **Service** setting with a loopback engine.
